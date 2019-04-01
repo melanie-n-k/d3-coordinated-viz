@@ -6,6 +6,25 @@ window.onload = setMap();
 
 //set up choropleth with setMap function
 function setMap(){
+//map dimensions
+  var width = 960,
+      height = 460;
+
+  //create a container for the map
+  var map = d3.select("body")
+      .append("svg")
+      .attr("class", "map")
+      .attr("width", width)
+      .attr("height", height);
+
+  //set up porjection: Albers equal area for usa
+  var projection = d3.geoAlbers()
+      .center([39.81, -98.55])
+      .rotate([-2, 0, 0])
+      .parallels([43, 62])
+      .scale(2500)
+      .translate([width/2, height/2]);
+
   //use Promise to make the data load in parallel
   var promises = [];
   promises.push(d3.csv("data/state_data.csv")); //load csv with data attributes for each state
