@@ -15,11 +15,17 @@ function setMap(){
 
   //function to call back to setMap and to prepare some variables
   function callback(data){
-    csvData = data[0];
+    forestData = data[0];
     contig = data[1];
     forests = data[2];
-    console.log(csvData);
-    console.log(contig);
-    console.log(forests);
+    //console.log(forestData);
+    //console.log(contig);
+    //console.log(forests);
+ var contigUS = topojson.feature(contig, contig.objects.contiguous),
+     forestStates = topojson.feature(forests, forests.objects.forest_states);
+
+        //examine the results
+        console.log(contigUS);
+        console.log(forestStates);
   };
 };
