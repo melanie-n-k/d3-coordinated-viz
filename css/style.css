@@ -1,0 +1,28 @@
+/* stylesheet by mkohls */
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: black;
+  stroke-width: 1px;
+  shapre-rendering: crispEdges;
+}
+
+.axis text {
+  font-family: sans-serif;
+  font-size: 1em;
+}
+
+.title {
+  font-family: sans-serif;
+  font-size: 1.4em;
+  font-weight: bold;
+}
+
+.firstLine {
+  font-family: sans-serif;
+}
+
+.nextLine {
+  font-family: sans-serif;
+}
