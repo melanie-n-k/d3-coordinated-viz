@@ -1,1 +1,6 @@
 /* stylesheet by mkohls */
+.units {
+    fill: #FFF;
+    stroke: #CCC;
+    stroke-width: 2px;
+}

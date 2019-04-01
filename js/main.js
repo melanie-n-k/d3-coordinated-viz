@@ -25,6 +25,10 @@ function setMap(){
       .scale(2500)
       .translate([width/2, height/2]);
 
+  //create a path generator
+  var path = d3.geoPath()
+      .projection(projection);
+
   //use Promise to make the data load in parallel
   var promises = [];
   promises.push(d3.csv("data/state_data.csv")); //load csv with data attributes for each state
@@ -46,5 +50,20 @@ function setMap(){
         //examine the results
         console.log(contigUS);
         console.log(forestStates);
+
+  var states = map.append("path")
+      .datum(contigUS)
+      .attr("class", "states")
+      .attr("d", path);
+
+  var units = map.selectAll(".units")
+      .data(forestStates)
+      .enter()
+      .append("path")
+      .attr("class", function(d){
+        return "units " + d.properties.adm1_code;
+      })
+      .attr("d", path);
+
   };
 };
