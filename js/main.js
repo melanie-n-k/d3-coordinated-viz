@@ -19,10 +19,10 @@ function setMap(){
 
   //set up porjection: Albers equal area for usa
   var projection = d3.geoAlbers()
-      .center([-3.64, 39.05])
+      .center([-3.64, 40])
       .rotate([95.5, 1.82, 0])
       .parallels([29.5, 45.5])
-      .scale(650)
+      .scale(950)
       .translate([width/2, height/2]);
 
   //create a path generator
@@ -32,8 +32,8 @@ function setMap(){
   //use Promise to make the data load in parallel
   var promises = [];
   promises.push(d3.csv("data/state_data.csv")); //load csv with data attributes for each state
-  promises.push(d3.json("data/contig.topojson")); //load background spatial data
-  promises.push(d3.json("data/forest.topojson")); //load choropleth spatial data
+  promises.push(d3.json("data/contiguous_US.topojson")); //load background spatial data
+  promises.push(d3.json("data/FIA_states.topojson")); //load choropleth spatial data
   Promise.all(promises).then(callback);
 
   //function to call back to setMap and to prepare some variables
@@ -44,8 +44,8 @@ function setMap(){
     //console.log(forestData);
     //console.log(contig);
     //console.log(forests);
- var contigUS = topojson.feature(contig, contig.objects.contig),
-     forestStates = topojson.feature(forests, forests.objects.forest);
+ var contigUS = topojson.feature(contig, contig.objects.contiguous_US),
+     forestStates = topojson.feature(forests, forests.objects.FIA_states).features;
 
         //examine the results
         console.log(contigUS);
