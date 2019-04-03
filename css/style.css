@@ -1,21 +1,27 @@
 /* stylesheet by mkohls */
 
 .map {
-    border: medium solid #999;
+    border: medium solid #C4C4C4;
 }
 
 .units {
-    fill: #FFF;
-    stroke: #CCC;
+    fill: #D2D8D5;
+    stroke: #282828;
+    stroke-width: 2px;
+}
+
+.states {
+    fill: #D2D8D5;
+    stroke: #282828;
     stroke-width: 2px;
 }
 
 .gratLines {
     fill: none;
-    stroke: #999;
-    stroke-width: 1px;
+    stroke: #C4C4C4;
+    stroke-width: 0.5px;
 }
 
 .gratBackground {
-    fill: #D5E3FF;
+    fill: #DDF8FA;
 }

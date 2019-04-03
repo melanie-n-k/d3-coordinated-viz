@@ -19,10 +19,10 @@ function setMap(){
 
   //set up porjection: Albers equal area for usa
   var projection = d3.geoAlbers()
-      .center([-3.64, 40])
-      .rotate([95.5, 1.82, 0])
-      .parallels([29.5, 45.5])
-      .scale(950)
+      .center([0, 38.5])
+      .rotate([98, 0, 0])
+      .parallels([29, 45.5])
+      .scale(900)
       .translate([width/2, height/2]);
 
   //create a path generator
@@ -35,6 +35,25 @@ function setMap(){
   promises.push(d3.json("data/contiguous_US.topojson")); //load background spatial data
   promises.push(d3.json("data/FIA_states.topojson")); //load choropleth spatial data
   Promise.all(promises).then(callback);
+
+  //create graticule generator
+  var graticule = d3.geoGraticule()
+      .step([5, 5]); //place graticule lines every 5 degrees of longitude and latitude
+
+  //create graticule background
+  var gratBackground = map.append("path")
+      .datum(graticule.outline()) //bind graticule background
+      .attr("class", "gratBackground") //assign class for styling
+      .attr("d", path) //project graticule]
+
+  //create graticule lines
+  var gratLines = map.selectAll(".gratLines") //select graticule elements that will be created
+      .data(graticule.lines()) //bind graticule lines to each element to be created
+      .enter() //create an element for each datum
+      .append("path") //append each element to the svg as a path element
+      .attr("class", "gratLines") //assign class for styling
+      .attr("d", path); //project graticule lines
+
 
   //function to call back to setMap and to prepare some variables
   function callback(data){
@@ -64,23 +83,6 @@ function setMap(){
         return "units " + d.properties.adm1_code;
       })
       .attr("d", path);
-
-//create the graticule generator to put lines every 5 degrees of lat/long
-  var graticule = d3.geoGraticule()
-      .step([5, 5]);
-
-  //create graticule background
-  var gratBackground = map.append("path")
-      .datum(graticule.outline()) //bind graticule background
-      .attr("class", "gratBackground") //assign class for styling
-      .attr("d", path); //project graticule
-
-  var gratLines = map.selectAll(".gratlines")
-      .data(graticule.lines()) //bind graticule lines to each element to be created
-      .enter() //create an element for each datum
-      .append("path") //append each element to the svg as a path element
-      .attr("class", "gratLines") //assign class for styling
-      .attr("d", path); //project graticule lines
 
   };
 };
