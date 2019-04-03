@@ -1,6 +1,13 @@
 /* javascript sheet mkohls */
 //D3 lab
 
+//anonymous function to keep everything local
+(function(){
+
+  //variables for data join
+ var attArray = ["forest_land", "timber_land", "live_trees", "dead_trees", "carbon_live"];
+ var expressed = attArray[0]; //initial attribute
+
 //when window loads, start running script
 window.onload = setMap();
 
@@ -67,8 +74,7 @@ function setMap(){
  var contigUS = topojson.feature(contig, contig.objects.contiguous_US),
      forestStates = topojson.feature(forests, forests.objects.FIA_states).features;
 
-//variables for data join
- var attrArray = ["forest_land", "timber_land", "live_trees", "dead_trees", "carbon_live"];
+
 
 //loop through csv to assign each set of csv attribute values to geojson region
  for (var i=0; i<forestData.length; i++){
@@ -85,7 +91,7 @@ function setMap(){
         if (geojsonKey == csvKey){
 
             //assign all attributes and values
-            attrArray.forEach(function(attr){
+            attArray.forEach(function(attr){
                 var val = parseFloat(csvState[attr]); //get csv attribute value
                 geojsonProps[attr] = val; //assign attribute and value to geojson properties
             });
@@ -94,7 +100,6 @@ function setMap(){
 };
         //examine the results
         console.log(forestData);
-        console.log(attrArray);
         console.log(forestStates);
 
   var states = map.append("path")
@@ -113,3 +118,4 @@ function setMap(){
 
   };
 };
+})(); //end of anonymous wrapper function
