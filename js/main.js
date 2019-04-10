@@ -15,7 +15,7 @@ window.onload = setMap();
 function setMap(){
 //map dimensions
   var width = window.innerWidth * 0.5,
-      height = 460;
+      height = 600;
 
   //create a container for the map
   var map = d3.select("body")
@@ -177,7 +177,7 @@ function makeColorScale(data){
  function setChart(forestData, colorScale){
      //chart frame dimensions
      var chartWidth = window.innerWidth * 0.425,
-         chartHeight = 460;
+         chartHeight = 600;
 
      //create a second svg element to hold the bar chart
      var chart = d3.select("body")
@@ -216,7 +216,7 @@ function makeColorScale(data){
              return chartHeight - yScale(parseFloat(d[expressed]));
          })
        .style("fill", function(d){
-          return choropleth(d, colorScale);
+          return choropleth(d[expressed], colorScale);
       });
 
 //annotate bars
@@ -246,6 +246,6 @@ function makeColorScale(data){
        .attr("x", 20)
        .attr("y", 40)
        .attr("class", "chartTitle")
-       .text("Amount of " + expressed + " in 15 states");
+       .text("Amount of " + expressed + " in 15 US states");
  };
 })(); //end of anonymous wrapper function
