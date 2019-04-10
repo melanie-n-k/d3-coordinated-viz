@@ -14,7 +14,7 @@ window.onload = setMap();
 //set up choropleth with setMap function
 function setMap(){
 //map dimensions
-  var width = 960,
+  var width = window.innerWidth * 0.5,
       height = 460;
 
   //create a container for the map
@@ -69,6 +69,9 @@ function setMap(){
     var colorScale = makeColorScale(forestData);
     //add enumeration units to the map
     setEnumerationUnits(forestStates, map, path, colorScale);
+
+    //add coordinated visualization to the map
+    setChart(forestData, colorScale);
   };
 }; //end of setMap function
 
@@ -135,7 +138,6 @@ function setEnumerationUnits(forestStates, map, path, colorScale){
 function choropleth(props, colorScale){
     //make sure attribute value is a number
     var val = parseFloat(props);
-    console.log(props);
     //if attribute value exists, assign a color; otherwise assign gray
     if (typeof val == 'number' && !isNaN(val)){
         return colorScale(val);
@@ -171,4 +173,17 @@ function makeColorScale(data){
     return colorScale;
  };
 
+ //function to create coordinated bar chart
+ function setChart(forestData, colorScale){
+     //chart frame dimensions
+     var chartWidth = window.innerWidth * 0.425,
+         chartHeight = 460;
+
+     //create a second svg element to hold the bar chart
+     var chart = d3.select("body")
+         .append("svg")
+         .attr("width", chartWidth)
+         .attr("height", chartHeight)
+         .attr("class", "chart");
+ };
 })(); //end of anonymous wrapper function

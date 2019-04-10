@@ -2,6 +2,7 @@
 
 .map {
     border: medium solid #C4C4C4;
+    margin: 10px 0 0 20px;
 }
 
 .units {
@@ -24,4 +25,11 @@
 
 .gratBackground {
     fill: #DDF8FA;
+}
+
+.chart {
+    background-color: rgba(128,128,128,.2);
+    border: medium solid #C4C4C4;
+    float: right;
+    margin: 10px 20px 0 0;
 }
