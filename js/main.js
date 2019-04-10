@@ -65,10 +65,12 @@ function setMap(){
     //join csv data to GeoJSON enumeration units
     forestStates = joinData(forestStates, forestData);
 
+//create color scale
+    var colorScale = makeColorScale(forestData);
     //add enumeration units to the map
-    setEnumerationUnits(forestStates, map, path);
+    setEnumerationUnits(forestStates, map, path, colorScale);
   };
- };
+}; //end of setMap function
 
 //function to create the graticule
  function setGraticule(map, path){
@@ -115,8 +117,44 @@ function setMap(){
    return forestStates;
 };
 
+//function to create color scale generator
+function makeColorScale(data){
+    var colorClasses = [
+        "#edf8e9",
+        "#bae4b3",
+        "#74c476",
+        "#31a354",
+        "#006d2c"
+    ];
+
+    //create color scale generator
+    var colorScale = d3.scaleThreshold()
+        .range(colorClasses);
+
+    //build array of all values of the expressed attribute
+    var domainArray = [];
+    for (var i=0; i<data.length; i++){
+        var val = parseFloat(data[i][expressed]);
+        domainArray.push(val);
+    };
+
+//cluster data using ckmeans clustering algorithm to create natural breaks
+    var clusters = ss.ckmeans(domainArray, 5);
+    //reset domain array to cluster minimums
+    domainArray = clusters.map(function(d){
+        return d3.min(d);
+    });
+    //remove first value from domain array to create class breakpoints
+    domainArray.shift();
+
+    //assign array of last 4 cluster minimums as domain
+    colorScale.domain(domainArray);
+
+    return colorScale;
+ };
+
 //function to draw the enumeration units on the map
-function setEnumerationUnits(forestStates, map, path){
+function setEnumerationUnits(forestStates, map, path,colorScale){
     var units = map.selectAll(".units")
         .data(forestStates)
         .enter()
@@ -124,6 +162,20 @@ function setEnumerationUnits(forestStates, map, path){
         .attr("class", function(d){
           return "units " + d.properties.adm1_code;
         })
-        .attr("d", path);
+        .attr("d", path)
+        .style("fill", function(d){
+          return choropleth(d.properties[expressed],colorScale);
+        });
+};
+//function to test for data value and return color
+function choropleth(props, colorScale){
+    //make sure attribute value is a number
+    var val = parseFloat(props[expressed]);
+    //if attribute value exists, assign a color; otherwise assign gray
+    if (typeof val == 'number' && !isNaN(val)){
+        return colorScale(val);
+    } else {
+        return "#CCC";
+    };
 };
 })(); //end of anonymous wrapper function
