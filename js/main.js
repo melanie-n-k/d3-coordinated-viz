@@ -185,5 +185,67 @@ function makeColorScale(data){
          .attr("width", chartWidth)
          .attr("height", chartHeight)
          .attr("class", "chart");
+
+   //create a scale to size bars proportionally to frame
+    var yScale = d3.scaleLinear()
+       .range([0, chartHeight])
+       .domain([0, 105]);
+
+         //set bars for each province
+    var bars = chart.selectAll(".bars")
+        .data(forestData)
+        .enter()
+        .append("rect")
+        .sort(function(a, b){
+           return a[expressed]-b[expressed]
+       })
+       .attr("class", function(d){
+           return "bars " + d.adm1_code;
+       })
+        .attr("class", function(d){
+            return "bars " + d.forest_land;
+        })
+        .attr("width", chartWidth / forestData.length - 1)
+        .attr("x", function(d, i){
+            return i * (chartWidth / forestData.length);
+        })
+        .attr("height", function(d){
+           return yScale(parseFloat(d[expressed]));
+       })
+       .attr("y", function(d){
+             return chartHeight - yScale(parseFloat(d[expressed]));
+         })
+       .style("fill", function(d){
+          return choropleth(d, colorScale);
+      });
+
+//annotate bars
+      var numbers = chart.selectAll(".numbers")
+          .data(forestData)
+          .enter()
+          .append("text")
+          .sort(function(a, b){
+              return a[expressed]-b[expressed]
+          })
+          .attr("class", function(d){
+              return "numbers " + d.forest_land;
+          })
+          .attr("text-anchor", "middle")
+          .attr("x", function(d, i){
+              var fraction = chartWidth / forestData.length;
+              return i * fraction + (fraction - 1) / 2;
+          })
+          .attr("y", function(d){
+              return chartHeight - yScale(parseFloat(d[expressed])) + 15;
+          })
+          .text(function(d){
+              return d[expressed];
+          });
+
+      var chartTitle = chart.append("text")
+       .attr("x", 20)
+       .attr("y", 40)
+       .attr("class", "chartTitle")
+       .text("Amount of " + expressed + " in 15 states");
  };
 })(); //end of anonymous wrapper function
