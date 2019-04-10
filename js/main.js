@@ -43,79 +43,87 @@ function setMap(){
   promises.push(d3.json("data/FIA_states.topojson")); //load choropleth spatial data
   Promise.all(promises).then(callback);
 
-  //create graticule generator
-  var graticule = d3.geoGraticule()
-      .step([5, 5]); //place graticule lines every 5 degrees of longitude and latitude
-
-  //create graticule background
-  var gratBackground = map.append("path")
-      .datum(graticule.outline()) //bind graticule background
-      .attr("class", "gratBackground") //assign class for styling
-      .attr("d", path) //project graticule]
-
-  //create graticule lines
-  var gratLines = map.selectAll(".gratLines") //select graticule elements that will be created
-      .data(graticule.lines()) //bind graticule lines to each element to be created
-      .enter() //create an element for each datum
-      .append("path") //append each element to the svg as a path element
-      .attr("class", "gratLines") //assign class for styling
-      .attr("d", path); //project graticule lines
-
-
   //function to call back to setMap and to prepare some variables
   function callback(data){
     forestData = data[0];
     contig = data[1];
     forests = data[2];
-    //console.log(forestData);
-    //console.log(contig);
-    //console.log(forests);
 
- var contigUS = topojson.feature(contig, contig.objects.contiguous_US),
-     forestStates = topojson.feature(forests, forests.objects.FIA_states).features;
+//set the graticule
+    setGraticule(map, path);
 
+//translate topojsons
+    var contigUS = topojson.feature(contig, contig.objects.contiguous_US),
+        forestStates = topojson.feature(forests, forests.objects.FIA_states).features;
 
+//add states to map
+    var states = map.append("path")
+        .datum(contigUS)
+        .attr("class", "states")
+        .attr("d", path);
 
-//loop through csv to assign each set of csv attribute values to geojson region
- for (var i=0; i<forestData.length; i++){
-    var csvState = forestData[i]; //the current state
-    var csvKey = csvState.adm1_code; //the CSV primary key
+    //join csv data to GeoJSON enumeration units
+    forestStates = joinData(forestStates, forestData);
 
-    //loop through geojson states to find correct state
-    for (var a=0; a<forestStates.length; a++){
-
-        var geojsonProps = forestStates[a].properties; //the current state geojson properties
-        var geojsonKey = geojsonProps.adm1_code; //the geojson primary key
-
-        //where primary keys match, transfer csv data to geojson properties object
-        if (geojsonKey == csvKey){
-
-            //assign all attributes and values
-            attArray.forEach(function(attr){
-                var val = parseFloat(csvState[attr]); //get csv attribute value
-                geojsonProps[attr] = val; //assign attribute and value to geojson properties
-            });
-        };
-    };
-};
-        //examine the results
-        console.log(forestData);
-        console.log(forestStates);
-
-  var states = map.append("path")
-      .datum(contigUS)
-      .attr("class", "states")
-      .attr("d", path);
-
-  var units = map.selectAll(".units")
-      .data(forestStates)
-      .enter()
-      .append("path")
-      .attr("class", function(d){
-        return "units " + d.properties.adm1_code;
-      })
-      .attr("d", path);
-
+    //add enumeration units to the map
+    setEnumerationUnits(forestStates, map, path);
   };
+ };
+
+//function to create the graticule
+ function setGraticule(map, path){
+    //create graticule generator
+    var graticule = d3.geoGraticule()
+        .step([5, 5]); //place graticule lines every 5 degrees of longitude and latitude
+
+    //create graticule background
+    var gratBackground = map.append("path")
+        .datum(graticule.outline()) //bind graticule background
+        .attr("class", "gratBackground") //assign class for styling
+        .attr("d", path) //project graticule]
+
+    //create graticule lines
+    var gratLines = map.selectAll(".gratLines") //select graticule elements that will be created
+        .data(graticule.lines()) //bind graticule lines to each element to be created
+        .enter() //create an element for each datum
+        .append("path") //append each element to the svg as a path element
+        .attr("class", "gratLines") //assign class for styling
+        .attr("d", path); //project graticule lines
+ };
+
+//function to join the csv data to the topojson
+ function joinData(forestStates, forestData){
+   //loop through csv to assign each set of csv attribute values to geojson region
+    for (var i=0; i<forestData.length; i++){
+       var csvState = forestData[i]; //the current state
+       var csvKey = csvState.adm1_code; //the CSV primary key
+
+       //loop through geojson states to find correct state
+       for (var a=0; a<forestStates.length; a++){
+           var geojsonProps = forestStates[a].properties; //the current state geojson properties
+           var geojsonKey = geojsonProps.adm1_code; //the geojson primary key
+           //where primary keys match, transfer csv data to geojson properties object
+           if (geojsonKey == csvKey){
+               //assign all attributes and values
+               attArray.forEach(function(attr){
+                   var val = parseFloat(csvState[attr]); //get csv attribute value
+                   geojsonProps[attr] = val; //assign attribute and value to geojson properties
+               });
+           };
+       };
+   };
+   return forestStates;
+};
+
+//function to draw the enumeration units on the map
+function setEnumerationUnits(forestStates, map, path){
+    var units = map.selectAll(".units")
+        .data(forestStates)
+        .enter()
+        .append("path")
+        .attr("class", function(d){
+          return "units " + d.properties.adm1_code;
+        })
+        .attr("d", path);
 };
 })(); //end of anonymous wrapper function
