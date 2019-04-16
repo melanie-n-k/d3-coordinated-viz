@@ -34,6 +34,10 @@
     margin: 10px 20px 0 0;
 }
 
+.chartBackground {
+    fill: #DDF8FA;
+}
+
 .numbers {
     fill: white;
     font-family: sans-serif;

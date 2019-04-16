@@ -8,6 +8,21 @@
  var attArray = ["forest_land", "timber_land", "live_trees", "dead_trees", "carbon_live"];
  var expressed = attArray[0]; //initial attribute
 
+ //chart frame dimensions
+var chartWidth = window.innerWidth * 0.38,
+    chartHeight = 600,
+    leftPadding = 25,
+    rightPadding = 2,
+    topBottomPadding = 5,
+    chartInnerWidth = chartWidth - leftPadding - rightPadding,
+    chartInnerHeight = chartHeight - topBottomPadding * 2,
+    translate = "translate(" + leftPadding + "," + topBottomPadding + ")";
+
+//create a scale to size bars proportionally to frame and for axis
+var yScale = d3.scaleLinear()
+    .range([0, chartHeight])
+    .domain([0, 100]);
+
 //when window loads, start running script
 window.onload = setMap();
 
@@ -209,7 +224,28 @@ function changeAttribute(attribute, forestData){
     var units = d3.selectAll(".units")
         .style("fill", function(d){
             return choropleth(d.properties[expressed], colorScale)
-        });
+        })
+  //re-sort, resize, and recolor bars
+    var bars = d3.selectAll(".bars")
+        //re-sort bars
+        .sort(function(a, b){
+            return b[expressed] - a[expressed];
+        })
+        updateChart(bars, forestData.length, colorScale);
+        // .attr("x", function(d, i){
+        //     return i * (chartInnerWidth / forestData.length) + leftPadding;
+        // })
+        // //resize bars
+        // .attr("height", function(d, i){
+        //     return 463 - yScale(parseFloat(d[expressed]));
+        // })
+        // .attr("y", function(d, i){
+        //     return yScale(parseFloat(d[expressed])) + topBottomPadding;
+        // })
+        // //recolor bars
+        // .style("fill", function(d){
+        //     return choropleth(d[expressed], colorScale);
+        // });
 };
 
  //function to create coordinated bar chart
@@ -224,11 +260,16 @@ function changeAttribute(attribute, forestData){
          .attr("width", chartWidth)
          .attr("height", chartHeight)
          .attr("class", "chart");
-
+     //create a rectangle for chart background fill
+     var chartBackground = chart.append("rect")
+         .attr("class", "chartBackground")
+         .attr("width", chartWidth)
+         .attr("height", chartHeight)
+         //.attr("transform", translate);
    //create a scale to size bars proportionally to frame
     var yScale = d3.scaleLinear()
        .range([0, chartHeight])
-       .domain([0, 105]);
+       .domain([0, 100]);
 
          //set bars for each province
     var bars = chart.selectAll(".bars")
@@ -236,15 +277,15 @@ function changeAttribute(attribute, forestData){
         .enter()
         .append("rect")
         .sort(function(a, b){
-           return a[expressed]-b[expressed]
+           return b[expressed]-a[expressed]
        })
        .attr("class", function(d){
            return "bars " + d.adm1_code;
        })
-        .attr("class", function(d){
-            return "bars " + d.forest_land;
-        })
-        .attr("width", chartWidth / forestData.length - 1)
+        // .attr("class", function(d){
+        //     return "bars " + d.forest_land;
+        // })
+        .attr("width", chartWidth / forestData.length - 6)
         .attr("x", function(d, i){
             return i * (chartWidth / forestData.length);
         })
@@ -267,7 +308,7 @@ function changeAttribute(attribute, forestData){
               return a[expressed]-b[expressed]
           })
           .attr("class", function(d){
-              return "numbers " + d.forest_land;
+              return "numbers " + d.adm1_code;
           })
           .attr("text-anchor", "middle")
           .attr("x", function(d, i){
@@ -283,8 +324,32 @@ function changeAttribute(attribute, forestData){
 
       var chartTitle = chart.append("text")
        .attr("x", 20)
-       .attr("y", 40)
+       .attr("y", 30)
        .attr("class", "chartTitle")
        .text("Amount of " + expressed + " in 15 US states");
+
+      updateChart(bars, forestData.length, colorScale);
  };
+
+//function to position, size, and color bars in chart
+ function updateChart(bars, n, colorScale){
+    //position bars
+    bars.attr("x", function(d, i){
+            return i * (chartInnerWidth / n) + leftPadding;
+        })
+        //size/resize bars
+        .attr("height", function(d, i){
+            return 463 - yScale(parseFloat(d[expressed]));
+        })
+        .attr("y", function(d, i){
+            return yScale(parseFloat(d[expressed])) + topBottomPadding;
+        })
+        //color/recolor bars
+        .style("fill", function(d){
+            return choropleth(d[expressed], colorScale);
+        });
+
+        var chartTitle = d3.select(".chartTitle")
+        .text("Amount of " + expressed + " in 15 US states");
+};
 })(); //end of anonymous wrapper function
