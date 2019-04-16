@@ -44,3 +44,20 @@
     font-size: 1.3em;
     font-weight: bold;
 }
+
+.dropdown {
+    position: absolute;
+    top: 30px;
+    left: 40px;
+    z-index: 10;
+    font-family: sans-serif;
+    font-size: 1em;
+    font-weight: bold;
+    padding: 2px;
+    border: 1.2px solid #C4C4C4;
+    box-shadow: 2px 2px 4px #C4C4C4;
+}
+
+option {
+    font-weight: normal;
+}

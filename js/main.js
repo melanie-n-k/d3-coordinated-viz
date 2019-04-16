@@ -14,7 +14,7 @@ window.onload = setMap();
 //set up choropleth with setMap function
 function setMap(){
 //map dimensions
-  var width = window.innerWidth * 0.5,
+  var width = window.innerWidth * 0.56,
       height = 600;
 
   //create a container for the map
@@ -69,9 +69,10 @@ function setMap(){
     var colorScale = makeColorScale(forestData);
     //add enumeration units to the map
     setEnumerationUnits(forestStates, map, path, colorScale);
-
     //add coordinated visualization to the map
     setChart(forestData, colorScale);
+    //add dropdown menu to setMap
+    createDropdown(forestData);
   };
 }; //end of setMap function
 
@@ -173,10 +174,48 @@ function makeColorScale(data){
     return colorScale;
  };
 
+ //function to create a dropdown menu for attribute selection
+ function createDropdown(forestData){
+     //add select element
+     var dropdown = d3.select("body")
+         .append("select")
+         .attr("class", "dropdown")
+         .on("change", function(){
+            changeAttribute(this.value, forestData)
+        });
+
+     //add initial option
+     var titleOption = dropdown.append("option")
+         .attr("class", "titleOption")
+         .attr("disabled", "true")
+         .text("Select Attribute");
+
+     //add attribute name options
+     var attrOptions = dropdown.selectAll("attrOptions")
+         .data(attArray)
+         .enter()
+         .append("option")
+         .attr("value", function(d){ return d })
+         .text(function(d){ return d });
+ };
+
+ //dropdown change listener handler
+function changeAttribute(attribute, forestData){
+    //change the expressed attribute
+    expressed = attribute;
+    //recreate the color scale
+    var colorScale = makeColorScale(forestData);
+    //recolor enumeration units
+    var units = d3.selectAll(".units")
+        .style("fill", function(d){
+            return choropleth(d.properties[expressed], colorScale)
+        });
+};
+
  //function to create coordinated bar chart
  function setChart(forestData, colorScale){
      //chart frame dimensions
-     var chartWidth = window.innerWidth * 0.425,
+     var chartWidth = window.innerWidth * 0.38,
          chartHeight = 600;
 
      //create a second svg element to hold the bar chart
