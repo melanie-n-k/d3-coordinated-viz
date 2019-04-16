@@ -21,7 +21,7 @@ var chartWidth = window.innerWidth * 0.38,
 //create a scale to size bars proportionally to frame and for axis
 var yScale = d3.scaleLinear()
     .range([0, chartHeight])
-    .domain([0, 100]);
+    .domain([0, 350000]);
 
 //when window loads, start running script
 window.onload = setMap();
@@ -148,6 +148,9 @@ function setEnumerationUnits(forestStates, map, path, colorScale){
         .attr("d", path)
         .style("fill", function(d){
           return choropleth(d.properties[expressed],colorScale);
+        })
+        .on("mouseover", function(d){
+            highlight(d.properties);
         });
 };
 //function to test for data value and return color
@@ -222,6 +225,8 @@ function changeAttribute(attribute, forestData){
     var colorScale = makeColorScale(forestData);
     //recolor enumeration units
     var units = d3.selectAll(".units")
+        .transition()
+        .duration(1000)
         .style("fill", function(d){
             return choropleth(d.properties[expressed], colorScale)
         })
@@ -231,21 +236,12 @@ function changeAttribute(attribute, forestData){
         .sort(function(a, b){
             return b[expressed] - a[expressed];
         })
+        .transition() //add animation
+        .delay(function(d, i){
+            return i * 20
+        })
+        .duration(500);
         updateChart(bars, forestData.length, colorScale);
-        // .attr("x", function(d, i){
-        //     return i * (chartInnerWidth / forestData.length) + leftPadding;
-        // })
-        // //resize bars
-        // .attr("height", function(d, i){
-        //     return 463 - yScale(parseFloat(d[expressed]));
-        // })
-        // .attr("y", function(d, i){
-        //     return yScale(parseFloat(d[expressed])) + topBottomPadding;
-        // })
-        // //recolor bars
-        // .style("fill", function(d){
-        //     return choropleth(d[expressed], colorScale);
-        // });
 };
 
  //function to create coordinated bar chart
@@ -253,7 +249,6 @@ function changeAttribute(attribute, forestData){
      //chart frame dimensions
      var chartWidth = window.innerWidth * 0.38,
          chartHeight = 600;
-
      //create a second svg element to hold the bar chart
      var chart = d3.select("body")
          .append("svg")
@@ -282,48 +277,33 @@ function changeAttribute(attribute, forestData){
        .attr("class", function(d){
            return "bars " + d.adm1_code;
        })
-        // .attr("class", function(d){
-        //     return "bars " + d.forest_land;
-        // })
         .attr("width", chartWidth / forestData.length - 6)
+        .on("mouseover", highlight)
         .attr("x", function(d, i){
-            return i * (chartWidth / forestData.length);
+            return i * (chartWidth / forestData.length) + leftPadding;
         })
         .attr("height", function(d){
-           return yScale(parseFloat(d[expressed]));
+           return 463 - yScale(parseFloat(d[expressed]));
        })
        .attr("y", function(d){
-             return chartHeight - yScale(parseFloat(d[expressed]));
+             return yScale(parseFloat(d[expressed])) + topBottomPadding;
          })
        .style("fill", function(d){
           return choropleth(d[expressed], colorScale);
       });
 
-//annotate bars
-      var numbers = chart.selectAll(".numbers")
-          .data(forestData)
-          .enter()
-          .append("text")
-          .sort(function(a, b){
-              return a[expressed]-b[expressed]
-          })
-          .attr("class", function(d){
-              return "numbers " + d.adm1_code;
-          })
-          .attr("text-anchor", "middle")
-          .attr("x", function(d, i){
-              var fraction = chartWidth / forestData.length;
-              return i * fraction + (fraction - 1) / 2;
-          })
-          .attr("y", function(d){
-              return chartHeight - yScale(parseFloat(d[expressed])) + 15;
-          })
-          .text(function(d){
-              return d[expressed];
-          });
+  //create vertical axis generator
+      var yAxis = d3.axisLeft()
+          .scale(yScale);
+
+      //place axis
+      var axis = chart.append("g")
+          .attr("class", "axis")
+          .attr("transform", translate)
+          .call(yAxis);
 
       var chartTitle = chart.append("text")
-       .attr("x", 20)
+       .attr("x", 40)
        .attr("y", 30)
        .attr("class", "chartTitle")
        .text("Amount of " + expressed + " in 15 US states");
@@ -352,4 +332,13 @@ function changeAttribute(attribute, forestData){
         var chartTitle = d3.select(".chartTitle")
         .text("Amount of " + expressed + " in 15 US states");
 };
+
+//function to highlight enumeration units and bars
+function highlight(props){
+    //change stroke
+    var selected = d3.selectAll("." + props.adm1_code)
+        .style("stroke", "white")
+        .style("stroke-width", "2");
+};
+
 })(); //end of anonymous wrapper function
