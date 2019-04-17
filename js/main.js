@@ -11,17 +11,17 @@
  //chart frame dimensions
 var chartWidth = window.innerWidth * 0.38,
     chartHeight = 600,
-    leftPadding = 25,
-    rightPadding = 2,
-    topBottomPadding = 5,
-    chartInnerWidth = chartWidth - leftPadding - rightPadding,
+    leftPadding = 50,
+    rightPadding = 0,
+    topBottomPadding = 20,
+    chartInnerWidth = 570,
     chartInnerHeight = chartHeight - topBottomPadding * 2,
     translate = "translate(" + leftPadding + "," + topBottomPadding + ")";
 
 //create a scale to size bars proportionally to frame and for axis
 var yScale = d3.scaleLinear()
-    .range([0, chartHeight])
-    .domain([0, 350000]);
+    .range([570, 0])
+    .domain([0, 5000]);
 
 //when window loads, start running script
 window.onload = setMap();
@@ -91,6 +91,30 @@ function setMap(){
   };
 }; //end of setMap function
 
+//function to create color scale generator
+function makeColorScale(data){
+    var colorClasses = [
+        "#edf8e9",
+        "#bae4b3",
+        "#74c476",
+        "#31a354",
+        "#006d2c"
+    ];
+
+    //create color scale generator
+    var colorScale = d3.scaleQuantile()
+        .range(colorClasses);
+    //build array of all values of the expressed attribute
+    var domainArray = [];
+    for (var i=0; i<data.length; i++){
+        var val = parseFloat(data[i][expressed]);
+        domainArray.push(val);
+        //console.log(domainArray);
+    };
+    //assign array as domain
+    colorScale.domain(domainArray);
+    return colorScale;
+ };
 //function to create the graticule
  function setGraticule(map, path){
     //create graticule generator
@@ -135,70 +159,6 @@ function setMap(){
    };
    return forestStates;
 };
-
-//function to draw the enumeration units on the map
-function setEnumerationUnits(forestStates, map, path, colorScale){
-    var units = map.selectAll(".units")
-        .data(forestStates)
-        .enter()
-        .append("path")
-        .attr("class", function(d){
-          return "units " + d.properties.forest_land;
-        })
-        .attr("d", path)
-        .style("fill", function(d){
-          return choropleth(d.properties[expressed],colorScale);
-        })
-        .on("mouseover", function(d){
-            highlight(d.properties);
-                    })
-        .on("mouseout", function(d){
-                    dehighlight(d.properties);
-                })
-        .on("mousemove", moveLabel);
-
-    var desc = units.append("desc")
-        .text('{"stroke": "#000", "stroke-width": "1.5px"}');
-};
-//function to test for data value and return color
-function choropleth(props, colorScale){
-    //make sure attribute value is a number
-    var val = parseFloat(props);
-    //if attribute value exists, assign a color; otherwise assign gray
-    if (typeof val == 'number' && !isNaN(val)){
-        return colorScale(val);
-    } else {
-        return "#ccc";
-    };
-};
-
-//function to create color scale generator
-function makeColorScale(data){
-    var colorClasses = [
-        "#edf8e9",
-        "#bae4b3",
-        "#74c476",
-        "#31a354",
-        "#006d2c"
-    ];
-
-    //create color scale generator
-    var colorScale = d3.scaleQuantile()
-        .range(colorClasses);
-
-    //build array of all values of the expressed attribute
-    var domainArray = [];
-    for (var i=0; i<data.length; i++){
-        var val = parseFloat(data[i][expressed]);
-        domainArray.push(val);
-        //console.log(domainArray);
-    };
-
-    //assign array of last 4 cluster minimums as domain
-    colorScale.domain(domainArray);
-
-    return colorScale;
- };
 
  //function to create a dropdown menu for attribute selection
  function createDropdown(forestData){
@@ -252,6 +212,66 @@ function changeAttribute(attribute, forestData){
         updateChart(bars, forestData.length, colorScale);
 };
 
+//function to position, size, and color bars in chart
+ function updateChart(bars, n, colorScale){
+    //position bars
+    bars.attr("x", function(d, i){
+            return i * (chartInnerWidth / n) + leftPadding;
+        })
+        //size/resize bars
+        .attr("height", function(d, i){
+            return 570 - yScale(parseFloat(d[expressed]));
+        })
+        .attr("y", function(d, i){
+            return yScale(parseFloat(d[expressed])) + topBottomPadding-30;
+        })
+        //color/recolor bars
+        .style("fill", function(d){
+            return choropleth(d[expressed], colorScale);
+        });
+
+        var chartTitle = d3.select(".chartTitle")
+        .text("Amount of " + expressed + " in 15 US states");
+};
+
+//function to test for data value and return color
+function choropleth(props, colorScale){
+    //make sure attribute value is a number
+    var val = parseFloat(props);
+    //if attribute value exists, assign a color; otherwise assign gray
+    if (typeof val == 'number' && !isNaN(val)){
+        return colorScale(val);
+    } else {
+        return "#ccc";
+    };
+};
+
+//function to draw the enumeration units on the map
+function setEnumerationUnits(forestStates, map, path, colorScale){
+    var units = map.selectAll(".units")
+        .data(forestStates)
+        .enter()
+        .append("path")
+        .attr("class", function(d){
+          return "units " + d.properties.adm1_code;
+        })
+        .attr("d", path)
+        .style("fill", function(d){
+          return choropleth(d.properties[expressed],colorScale);
+        })
+        .on("mouseover", function(d){
+            highlight(d.properties);
+                    })
+        .on("mouseout", function(d){
+                    dehighlight(d.properties);
+                })
+        .on("mousemove", moveLabel);
+
+    var desc = units.append("desc")
+        .text('{"stroke": "#000", "stroke-width": "1.5px"}');
+};
+
+
  //function to create coordinated bar chart
  function setChart(forestData, colorScale){
      //chart frame dimensions
@@ -266,16 +286,12 @@ function changeAttribute(attribute, forestData){
      //create a rectangle for chart background fill
      var chartBackground = chart.append("rect")
          .attr("class", "chartBackground")
-         .attr("width", chartWidth)
-         .attr("height", chartHeight)
-         //.attr("transform", translate);
-   //create a scale to size bars proportionally to frame
-    var yScale = d3.scaleLinear()
-       .range([0, chartHeight])
-       .domain([0, 676149]);
+         .attr("width", chartInnerWidth)
+         .attr("height", chartInnerHeight)
+         .attr("transform", translate);
 
-         //set bars for each province
-    var bars = chart.selectAll(".bars")
+         //set bars for each state
+    var bars = chart.selectAll(".bar")
         .data(forestData)
         .enter()
         .append("rect")
@@ -285,25 +301,24 @@ function changeAttribute(attribute, forestData){
        .attr("class", function(d){
            return "bars " + d.adm1_code;
        })
-        .attr("width", chartWidth / forestData.length - 6)
+        .attr("width", chartInnerWidth / forestData.length - 5)
         .on("mouseover", highlight)
         .on("mouseout", dehighlight)
-        .on("mousemove", moveLabel)
-        .attr("x", function(d, i){
-            return i * (chartWidth / forestData.length) + leftPadding;
-        })
-        .attr("height", function(d){
-            return yScale(parseFloat(d[expressed]));
-        })
-       .attr("y", function(d){
-            return chartHeight - yScale(parseFloat(d[expressed]));
-        })
-       .style("fill", function(d){
-          return choropleth(d[expressed], colorScale);
-      });
+        .on("mousemove", moveLabel);
 
       var desc = bars.append("desc")
         .text('{"stroke": "none", "stroke-width": "0px"}');
+
+      var chartTitle = chart.append("text")
+       .attr("x", 100)
+       .attr("y", 18)
+       .attr("class", "chartTitle")
+       .text("Amount of " + expressed + " in 15 US states");
+
+     //create a scale to size bars proportionally to frame
+      var yScale = d3.scaleLinear()
+         .range([570, 0])
+         .domain([0, 5000]);
 
   //create vertical axis generator
       var yAxis = d3.axisLeft()
@@ -315,43 +330,17 @@ function changeAttribute(attribute, forestData){
           .attr("transform", translate)
           .call(yAxis);
 
-      var chartTitle = chart.append("text")
-       .attr("x", 40)
-       .attr("y", 30)
-       .attr("class", "chartTitle")
-       .text("Amount of " + expressed + " in 15 US states");
-
       updateChart(bars, forestData.length, colorScale);
  };
-
-//function to position, size, and color bars in chart
- function updateChart(bars, n, colorScale){
-    //position bars
-    bars.attr("x", function(d, i){
-            return i * (chartInnerWidth / n) + leftPadding;
-        })
-        //size/resize bars
-        .attr("height", function(d, i){
-            return 463 - yScale(parseFloat(d[expressed]));
-        })
-        .attr("y", function(d, i){
-            return yScale(parseFloat(d[expressed])) + topBottomPadding;
-        })
-        //color/recolor bars
-        .style("fill", function(d){
-            return choropleth(d[expressed], colorScale);
-        });
-
-        var chartTitle = d3.select(".chartTitle")
-        .text("Amount of " + expressed + " in 15 US states");
-};
 
 //function to highlight enumeration units and bars
 function highlight(props){
     //change stroke
     var selected = d3.selectAll("." + props.adm1_code)
         .style("stroke", "yellow")
-        .style("stroke-width", "2")
+        .style("fill-opacity", "0.7")
+        .style("stroke-width", "3")
+
     setLabel(props);
 };
 
@@ -360,6 +349,9 @@ function dehighlight(props){
     var selected = d3.selectAll("." + props.adm1_code)
         .style("stroke", function(){
             return getStyle(this, "stroke")
+        })
+        .style("fill-opacity", function(){
+            return getStyle(this, "fill-opacity")
         })
         .style("stroke-width", function(){
             return getStyle(this, "stroke-width")
@@ -401,13 +393,11 @@ function moveLabel(){
           .node()
           .getBoundingClientRect()
           .width;
-
       //use coordinates of mousemove event to set label coordinates
       var x1 = d3.event.clientX + 10,
           y1 = d3.event.clientY - 75,
           x2 = d3.event.clientX - labelWidth - 10,
           y2 = d3.event.clientY + 25;
-
       //horizontal label coordinate, testing for overflow
       var x = d3.event.clientX > window.innerWidth - labelWidth - 20 ? x2 : x1;
       //vertical label coordinate, testing for overflow

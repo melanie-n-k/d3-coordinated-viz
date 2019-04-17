@@ -1,5 +1,22 @@
 /* stylesheet by mkohls */
-
+#panel {
+  height: 200px;
+  font-size: 18px;
+  font-family: "Trebuchet MS";
+  background-color: #edf8e9;
+  text-align: center;
+  border: solid #C4C4C4 3px;
+}
+h1 {
+    display: block;
+    font-size: 24px;
+    text-align: center;
+    margin-block-start: 0.67em;
+    margin-block-end: 0.67em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+}
 .map {
     border: medium solid #C4C4C4;
     margin: 10px 0 0 20px;
@@ -41,21 +58,23 @@
 
 .numbers {
     fill: white;
-    font-family: sans-serif;
+    font-family: "Trebuchet MS";
 }
 
 .chartTitle {
-    font-family: sans-serif;
+    font-family: "Trebuchet MS";
     font-size: 1.3em;
     font-weight: bold;
+    position: absolute;
+    bottom: 0;
 }
 
 .dropdown {
     position: absolute;
-    top: 30px;
+    top: 240px;
     left: 40px;
     z-index: 10;
-    font-family: sans-serif;
+    font-family: "Trebuchet MS";
     font-size: 1em;
     font-weight: bold;
     padding: 2px;
@@ -69,6 +88,7 @@ option {
 
 .infolabel {
     margin: 0 20px 0 0;
+    font-family: "Trebuchet MS";
     position: absolute;
     height: 50px;
     min-width: 100px;
@@ -80,7 +100,20 @@ option {
 
 .infolabel h1 {
     margin: 0 20px 0 0;
+    font-family: "Trebuchet MS";
     padding: 0;
     display: inline-block;
     line-height: 1em;
+}
+
+#bottom {
+  height: 100px;
+  width: 600px;
+  font-size: 15px;
+  font-family: "Trebuchet MS";
+  background-color: #edf8e9;
+  text-align: center;
+  border: solid #C4C4C4 3px;
+  position: absolute;
+  bottom: 0;
 }
