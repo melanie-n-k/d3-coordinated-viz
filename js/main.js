@@ -150,8 +150,13 @@ function setEnumerationUnits(forestStates, map, path, colorScale){
           return choropleth(d.properties[expressed],colorScale);
         })
         .on("mouseover", function(d){
-            highlight(d.properties);
+            highlight(d.properties)
+        .on("mouseout", function(d){
+                    dehighlight(d.properties);
+                });
         });
+    var desc = units.append("desc")
+        .text('{"stroke": "#000", "stroke-width": "1.5px"}');
 };
 //function to test for data value and return color
 function choropleth(props, colorScale){
@@ -279,6 +284,7 @@ function changeAttribute(attribute, forestData){
        })
         .attr("width", chartWidth / forestData.length - 6)
         .on("mouseover", highlight)
+        .on("mouseout", dehighlight)
         .attr("x", function(d, i){
             return i * (chartWidth / forestData.length) + leftPadding;
         })
@@ -291,6 +297,9 @@ function changeAttribute(attribute, forestData){
        .style("fill", function(d){
           return choropleth(d[expressed], colorScale);
       });
+
+      var desc = bars.append("desc")
+        .text('{"stroke": "none", "stroke-width": "0px"}');
 
   //create vertical axis generator
       var yAxis = d3.axisLeft()
@@ -337,8 +346,29 @@ function changeAttribute(attribute, forestData){
 function highlight(props){
     //change stroke
     var selected = d3.selectAll("." + props.adm1_code)
-        .style("stroke", "white")
+        .style("stroke", "yellow")
         .style("stroke-width", "2");
+};
+
+//function to reset the element style on mouseout
+function dehighlight(props){
+    var selected = d3.selectAll("." + props.adm1_code)
+        .style("stroke", function(){
+            return getStyle(this, "stroke")
+        })
+        .style("stroke-width", function(){
+            return getStyle(this, "stroke-width")
+        });
+
+    function getStyle(element, styleName){
+        var styleText = d3.select(element)
+            .select("desc")
+            .text();
+
+        var styleObject = JSON.parse(styleText);
+
+        return styleObject[styleName];
+    };
 };
 
 })(); //end of anonymous wrapper function

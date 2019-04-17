@@ -9,6 +9,7 @@
     stroke-linecap: round;
     stroke: #282828;
     stroke-width: 1.5px;
+    z-index: 15;
 }
 
 .states {
