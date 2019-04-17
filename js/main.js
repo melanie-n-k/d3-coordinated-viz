@@ -150,11 +150,13 @@ function setEnumerationUnits(forestStates, map, path, colorScale){
           return choropleth(d.properties[expressed],colorScale);
         })
         .on("mouseover", function(d){
-            highlight(d.properties)
+            highlight(d.properties);
+                    })
         .on("mouseout", function(d){
                     dehighlight(d.properties);
-                });
-        });
+                })
+        .on("mousemove", moveLabel);
+
     var desc = units.append("desc")
         .text('{"stroke": "#000", "stroke-width": "1.5px"}');
 };
@@ -285,6 +287,7 @@ function changeAttribute(attribute, forestData){
         .attr("width", chartWidth / forestData.length - 6)
         .on("mouseover", highlight)
         .on("mouseout", dehighlight)
+        .on("mousemove", moveLabel)
         .attr("x", function(d, i){
             return i * (chartWidth / forestData.length) + leftPadding;
         })
@@ -347,7 +350,8 @@ function highlight(props){
     //change stroke
     var selected = d3.selectAll("." + props.adm1_code)
         .style("stroke", "yellow")
-        .style("stroke-width", "2");
+        .style("stroke-width", "2")
+    setLabel(props);
 };
 
 //function to reset the element style on mouseout
@@ -368,7 +372,35 @@ function dehighlight(props){
         var styleObject = JSON.parse(styleText);
 
         return styleObject[styleName];
+        d3.select(".infolabel")
+          .remove();
     };
+};
+
+//function to create dynamic label
+function setLabel(props){
+    //label content
+    var labelAttribute = "<h1>" + props[expressed] +
+        "</h1><b>" + expressed + "</b>";
+    //create info label div
+    var infolabel = d3.select("body")
+        .append("div")
+        .attr("class", "infolabel")
+        .attr("id", props.adm1_code + "_label")
+        .html(labelAttribute);
+    var unitName = infolabel.append("div")
+        .attr("class", "labelname")
+        .html(props.name);
+};
+
+//function to move info label with mouse
+function moveLabel(){
+    //use coordinates of mousemove event to set label coordinates
+    var x = d3.event.clientX + 10,
+        y = d3.event.clientY - 75;
+    d3.select(".infolabel")
+        .style("left", x + "px")
+        .style("top", y + "px");
 };
 
 })(); //end of anonymous wrapper function
