@@ -191,6 +191,7 @@ function makeColorScale(data){
     for (var i=0; i<data.length; i++){
         var val = parseFloat(data[i][expressed]);
         domainArray.push(val);
+        //console.log(domainArray);
     };
 
     //assign array of last 4 cluster minimums as domain
@@ -271,7 +272,7 @@ function changeAttribute(attribute, forestData){
    //create a scale to size bars proportionally to frame
     var yScale = d3.scaleLinear()
        .range([0, chartHeight])
-       .domain([0, 100]);
+       .domain([0, 676149]);
 
          //set bars for each province
     var bars = chart.selectAll(".bars")
@@ -292,11 +293,11 @@ function changeAttribute(attribute, forestData){
             return i * (chartWidth / forestData.length) + leftPadding;
         })
         .attr("height", function(d){
-           return 463 - yScale(parseFloat(d[expressed]));
-       })
+            return yScale(parseFloat(d[expressed]));
+        })
        .attr("y", function(d){
-             return yScale(parseFloat(d[expressed])) + topBottomPadding;
-         })
+            return chartHeight - yScale(parseFloat(d[expressed]));
+        })
        .style("fill", function(d){
           return choropleth(d[expressed], colorScale);
       });
