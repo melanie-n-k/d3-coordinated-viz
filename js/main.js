@@ -21,7 +21,7 @@ var chartWidth = window.innerWidth * 0.38,
 //create a scale to size bars proportionally to frame and for axis
 var yScale = d3.scaleLinear()
     .range([570, 0])
-    .domain([0, 5000]);
+    .domain([0, 4000]);
 
 //when window loads, start running script
 window.onload = setMap();
@@ -223,7 +223,7 @@ function changeAttribute(attribute, forestData){
             return 570 - yScale(parseFloat(d[expressed]));
         })
         .attr("y", function(d, i){
-            return yScale(parseFloat(d[expressed])) + topBottomPadding-30;
+            return yScale(parseFloat(d[expressed])) + topBottomPadding-10;
         })
         //color/recolor bars
         .style("fill", function(d){
@@ -261,10 +261,10 @@ function setEnumerationUnits(forestStates, map, path, colorScale){
         })
         .on("mouseover", function(d){
             highlight(d.properties);
-                    })
+        })
         .on("mouseout", function(d){
-                    dehighlight(d.properties);
-                })
+            dehighlight(d.properties);
+        })
         .on("mousemove", moveLabel);
 
     var desc = units.append("desc")
@@ -318,7 +318,7 @@ function setEnumerationUnits(forestStates, map, path, colorScale){
      //create a scale to size bars proportionally to frame
       var yScale = d3.scaleLinear()
          .range([570, 0])
-         .domain([0, 5000]);
+         .domain([0, 4000]);
 
   //create vertical axis generator
       var yAxis = d3.axisLeft()
@@ -339,7 +339,7 @@ function highlight(props){
     var selected = d3.selectAll("." + props.adm1_code)
         .style("stroke", "yellow")
         .style("fill-opacity", "0.7")
-        .style("stroke-width", "3")
+        .style("stroke-width", "3");
 
     setLabel(props);
 };
@@ -356,25 +356,24 @@ function dehighlight(props){
         .style("stroke-width", function(){
             return getStyle(this, "stroke-width")
         });
-
+      d3.select(".infolabel")
+        .remove();
     function getStyle(element, styleName){
         var styleText = d3.select(element)
             .select("desc")
             .text();
-
         var styleObject = JSON.parse(styleText);
-
         return styleObject[styleName];
-        d3.select(".infolabel")
-          .remove();
     };
 };
 
 //function to create dynamic label
 function setLabel(props){
     //label content
+
     var labelAttribute = "<h1>" + props[expressed] +
         "</h1><b>" + expressed + "</b>";
+        console.log(labelAttribute);
     //create info label div
     var infolabel = d3.select("body")
         .append("div")
